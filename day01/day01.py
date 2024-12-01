@@ -4,26 +4,21 @@ with open('input.txt') as file:
 p1 = 0
 p2 = 0
 
-ls = []
-rs = []
+A = []
+B = []
 
 for l in lines:
-    ls.append(int(l.split()[0]))
-    rs.append(int(l.split()[1]))
+    A.append(int(l.split()[0]))
+    B.append(int(l.split()[1]))
 
-ls.sort()
-rs.sort()
-for i, _ in enumerate(ls):
-    d = abs(ls[i] - rs[i])
-    p1 += d
+A.sort()
+B.sort()
 
-for x in ls:
-    c = 0
-    for y in rs:
-        if x == y:
-            c += 1
-    p2 += x * c
+for i in range(len(A)):
+    p1 += abs(A[i] - B[i])
 
+for a in A:
+    p2 += a * B.count(a)
 
 print("Part 1: " + str(p1))
 print("Part 2: " + str(p2))
