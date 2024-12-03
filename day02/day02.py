@@ -1,32 +1,33 @@
 with open('input.txt') as file:
     lines = [line.rstrip() for line in file]
 
-p1 = 0
-p2 = 0
+
+def get_deltas(ints):
+    deltas = []
+    prev = ints[0]
+    for i in range(1, len(ints)):
+        deltas.append(ints[i] - prev)
+        prev = ints[i]
+    return deltas
 
 
 def f(ints):
-    last = ints[0]
-    inc = True
-    dec = True
-    for i in range(1, len(ints)):
-        d = ints[i] - last
-        if not d in (1, 2, 3):
-            inc = False
-        if not d in (-1, -2, -3):
-            dec = False
-        last = ints[i]
-    return inc or dec
+    deltas = get_deltas(ints)
+    return all([x in (1, 2, 3) for x in deltas]) or all([x in (-1, -2, -3) for x in deltas])
 
+
+p1 = 0
+p2 = 0
 
 for l in lines:
-    ints = l.split()
-    ints = [int(x) for x in ints]
+    ints = list(map(int, l.split()))
 
     p1 += f(ints)
     maybe = False
     for i in range(len(ints)):
-        if f(ints[:i] + ints[i + 1:]):
+        temp = ints.copy()
+        temp.pop(i)
+        if f(temp):
             maybe = True
     if maybe:
         p2 += 1
