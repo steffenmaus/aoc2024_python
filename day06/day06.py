@@ -1,6 +1,7 @@
 with open('input.txt') as file:
     lines = [line.rstrip() for line in file]
 
+
 def next_in_dir(p, dir):
     x, y = p
     match dir % 4:
@@ -12,7 +13,26 @@ def next_in_dir(p, dir):
             return (x, y + 1)
         case 3:
             return (x - 1, y)
-    return p
+        case _:
+            return None
+
+
+def escape_maze(maze, walls, start, dir):
+    current = start
+    mem = set()
+    while current in maze.keys():
+        cand = next_in_dir(current, dir)
+        if cand not in walls:
+            current = cand
+        else:
+            dir += 1
+        state = (current, dir % 4)
+        if state in mem:
+            return False, mem
+        else:
+            mem.add(state)
+    return True, mem
+
 
 X = len(lines[0])
 Y = len(lines)
@@ -38,41 +58,18 @@ for y in range(0, Y):
                 maze[p] = "#"
                 start = p
 
+p1_knowns = set([s[0] for s in escape_maze(maze, walls, start, 0)[1]])
+p1 = len(p1_knowns)
 
-
-
-current = start
-dir = 0
-knowns = set()
-while current in maze.keys():
-    cand = next_in_dir(current, dir)
-    if cand not in walls:
-        current = cand
-        knowns.add(current)
-    else:
-        dir += 1
-
-p1 = len(knowns) - 1
 print("Part 1: " + str(p1))
 
 for y in range(0, Y):
     for x in range(0, X):
         p = (x, y)
-        if p in knowns and p not in walls and p != start:
-            mem = set()
-            current = start
-            dir = 0
-            while current in maze.keys():
-                cand = next_in_dir(current, dir)
-                if cand not in walls and cand != p:
-                    current = cand
-                else:
-                    dir += 1
-                state = (current, dir % 4)
-                if state in mem:
-                    p2 += 1
-                    break
-                else:
-                    mem.add(state)
+        if p in p1_knowns and p not in walls and p != start:
+            new_walls = walls.copy()
+            new_walls.add(p)
+            if not escape_maze(maze, new_walls, start, 0)[0]:
+                p2 += 1
 
 print("Part 2: " + str(p2))
