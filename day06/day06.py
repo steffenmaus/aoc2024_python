@@ -63,13 +63,11 @@ p1 = len(p1_knowns)
 
 print("Part 1: " + str(p1))
 
-for y in range(0, Y):
-    for x in range(0, X):
-        p = (x, y)
-        if p in p1_knowns and p not in walls and p != start:
-            new_walls = walls.copy()
-            new_walls.add(p)
-            if not escape_maze(maze, new_walls, start, 0)[0]:
-                p2 += 1
+for p in p1_knowns.difference(walls):
+     if p != start:
+        new_walls = walls.copy()
+        new_walls.add(p)
+        if not escape_maze(maze, new_walls, start, 0)[0]:
+            p2 += 1
 
 print("Part 2: " + str(p2))
