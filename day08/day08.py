@@ -1,24 +1,19 @@
+import math
+from collections import defaultdict
+
 with open('input.txt') as file:
     lines = [line.rstrip() for line in file]
 
 X = len(lines[0])
 Y = len(lines)
 
-p1 = 0
-p2 = 0
-
-ant = {}
+ant = defaultdict(list)
 for y in range(0, Y):
     for x in range(0, X):
         p = (x, y)
         c = lines[y][x]
         if c != ".":
-            if c in ant.keys():
-                ant[c].append(p)
-            else:
-                ant[c] = list()
-                ant[c].append(p)
-import math
+            ant[c].append(p)
 
 
 def cart_to_rad(x, y):
@@ -45,30 +40,26 @@ def f(p, points, p1):
         for q2 in points:
             if q != q2:
                 if cart_to_rad(p[0] - q[0], p[1] - q[1]) == cart_to_rad(p[0] - q2[0], p[1] - q2[1]):
-                    d = manh_d(q, q2)
-                    if p1:
-                        if manh_d(p, q) == 2 * manh_d(p, q2):
-                            return True
-                    else:
-                        if manh_d(p, q) % d == 0 and manh_d(p, q2) % d == 0:
-                            return True
+                    if manh_d(p, q) == 2 * manh_d(p, q2) or not p1:
+                        return True
     return False
 
 
+antinodes1 = set()
+antinodes2 = set()
 for y in range(0, Y):
     for x in range(0, X):
         p = (x, y)
-        ok = False
-        ok2 = False
         for target in ant.keys():
             if f(p, ant[target], True):
-                ok = True
+                antinodes1.add(p)
             if f(p, ant[target], False):
-                ok2 = True
-            if p in ant[target] and len(ant[target]) > 1:
-                ok2 = True
-        p1 += ok
-        p2 += ok2
+                antinodes2.add(p)
+            elif p in ant[target] and len(ant[target]) > 1:
+                antinodes2.add(p)
+
+p1 = len(antinodes1)
+p2 = len(antinodes2)
 
 print("Part 1: " + str(p1))
 print("Part 2: " + str(p2))
