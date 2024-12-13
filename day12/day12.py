@@ -132,3 +132,88 @@ for area in total:
 
 print("Part 1: " + str(p1))
 print("Part 2: " + str(p2))
+
+
+# 2nd approach for Part 2:
+from collections import defaultdict
+mem = {}
+def get_area_id_of_p(p):
+    if p not in mem.keys():
+        for area in total:
+            if p in area:
+                mem[p] = get_area_id(area)
+                break
+    return mem[p]
+
+
+def get_area_id(area):
+    return sorted(list(area))[0]
+
+
+p2 = 0
+
+sides = defaultdict(int)
+
+for y in range(Y + 1):
+    prev_upper = None
+    prev_lower = None
+    for x in range(X):
+        upper = (x, y - 1)
+        lower = (x, y)
+        if prev_upper is None:
+            if upper not in maze.keys():
+                sides[get_area_id_of_p(lower)] += 1
+            elif lower not in maze.keys():
+                sides[get_area_id_of_p(upper)] += 1
+            elif get_area_id_of_p(upper) != get_area_id_of_p(lower):
+                sides[get_area_id_of_p(upper)] += 1
+                sides[get_area_id_of_p(lower)] += 1
+        else:
+            if upper not in maze.keys():
+                if get_area_id_of_p(lower) != get_area_id_of_p(prev_lower):
+                    sides[get_area_id_of_p(lower)] += 1
+            elif lower not in maze.keys():
+                if get_area_id_of_p(upper) != get_area_id_of_p(prev_upper):
+                    sides[get_area_id_of_p(upper)] += 1
+            elif get_area_id_of_p(upper) != get_area_id_of_p(lower):
+                if get_area_id_of_p(lower) != get_area_id_of_p(prev_lower) or get_area_id_of_p(lower) == get_area_id_of_p(prev_upper):
+                    sides[get_area_id_of_p(lower)] += 1
+                if get_area_id_of_p(upper) != get_area_id_of_p(prev_upper) or get_area_id_of_p(upper) == get_area_id_of_p(prev_lower):
+                    sides[get_area_id_of_p(upper)] += 1
+        prev_upper = upper
+        prev_lower = lower
+
+for x in range(X + 1):
+    prev_left = None
+    prev_right = None
+    for y in range(Y):
+        left = (x - 1, y)
+        right = (x, y)
+        if prev_left is None:
+            if left not in maze.keys():
+                sides[get_area_id_of_p(right)] += 1
+            elif right not in maze.keys():
+                sides[get_area_id_of_p(left)] += 1
+            elif get_area_id_of_p(left) != get_area_id_of_p(right):
+                sides[get_area_id_of_p(left)] += 1
+                sides[get_area_id_of_p(right)] += 1
+        else:
+            if left not in maze.keys():
+                if get_area_id_of_p(right) != get_area_id_of_p(prev_right):
+                    sides[get_area_id_of_p(right)] += 1
+            elif right not in maze.keys():
+                if get_area_id_of_p(left) != get_area_id_of_p(prev_left):
+                    sides[get_area_id_of_p(left)] += 1
+            elif get_area_id_of_p(left) != get_area_id_of_p(right):
+                if get_area_id_of_p(right) != get_area_id_of_p(prev_right) or get_area_id_of_p(right) == get_area_id_of_p(prev_left):
+                    sides[get_area_id_of_p(right)] += 1
+                if get_area_id_of_p(left) != get_area_id_of_p(prev_left) or get_area_id_of_p(left) == get_area_id_of_p(prev_right):
+                    sides[get_area_id_of_p(left)] += 1
+        prev_left = left
+        prev_right = right
+
+for area in total:
+    size = len(area)
+    p2 += size * sides[get_area_id(area)]
+
+print(p2)
