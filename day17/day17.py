@@ -71,18 +71,23 @@ a = ints[0][0]
 prog = ints[-1]
 
 p1 = ",".join([str(x) for x in f(a, prog)])
+print("Part 1: " + str(p1))
+
 p2 = None
 
 a = 0
-# 0o3062346312204233
+solved = 0
+temp = 0
 while p2 is None:
-    # ta = a * 8**1 + 0o3
-    # ta = a * 8**4 + 0o4233
-    # ta = a * 8**9 + 0o312204233
-    ta = a * 8 ** 12 + 0o346312204233
-    if f(ta, prog) == prog:
+    ta = a * 8 ** solved + temp
+    res = f(ta, prog)
+    if res == prog:
         p2 = ta
-    a += 1
+    elif res[:solved + 4] == prog[:solved + 4]:
+        solved += 1
+        temp = ta % (8 ** solved)
+        a = 0
+    else:
+        a += 1
 
-print("Part 1: " + str(p1))
 print("Part 2: " + str(p2))
