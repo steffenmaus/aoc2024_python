@@ -39,18 +39,16 @@ for y in range(Y):
 start = (0, 0)
 target = (70, 70)
 
-for l in lines[:1024]:
+for i,l in enumerate(lines):
     x, y = list(map(int, l.split(",")))
     maze[(x, y)] = "#"
+    if i == 1024:
+        p1 = f(maze, start, target)
+    if i > 1024:
+        if f(maze, start, target) is None:
+            p2 = str(x) + "," + str(y)
+            break
 
-p1 = f(maze, start, target)
+
 print("Part 1: " + str(p1))
-
-for l in lines[1023:]:
-    x, y = list(map(int, l.split(",")))
-    maze[(x, y)] = "#"
-    if f(maze, start, target) is None:
-        p2 = str(x) + "," + str(y)
-        break
-
 print("Part 2: " + str(p2))
