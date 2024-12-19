@@ -1,27 +1,7 @@
 with open('input.txt') as file:
     lines = [line.rstrip() for line in file]
 
-
-def get_groups_from_lines(lines):
-    groups = []
-    group = []
-    for l in lines:
-        if not l:
-            groups.append(group)
-            group = []
-        else:
-            group.append(l)
-    groups.append(group)
-    return groups
-
-
-upper, lower = get_groups_from_lines(lines)
-
-colors = set()
-
-for l in upper:
-    for c in l.split(", "):
-        colors.add(c)
+colors = set(lines[0].split(", "))
 
 mem = {}
 
@@ -42,7 +22,7 @@ def f(remaining):
 p1 = 0
 p2 = 0
 
-for l in lower:
+for l in lines[2:]:
     res = f(l)
     p1 += res > 0
     p2 += res
