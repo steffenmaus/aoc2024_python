@@ -4,85 +4,39 @@ from collections import defaultdict
 with open('input.txt') as file:
     lines = [line.rstrip() for line in file]
 
-# Moves not complete. sufficient for my personal input and the sample data.
-# add all valid shortest moves possible (e.g. from 2 to 9)
-# exeption to this rule: if you have to press a button multiple times within a path, you should press it without different buttons in between. Those will not create an optimal solution for the outter roboter.
-# Example: <^< from A to 1 is NOT ideal
-# Note: Adding those will still provide a valid solution, but is a waste in time and code.
-moves_numeric = defaultdict(list)
-moves_numeric["A"].append(("0", "<"))
-moves_numeric["A"].append(("1", "^<<"))
-moves_numeric["A"].append(("3", "^"))
-moves_numeric["A"].append(("4", "^^<<"))
-moves_numeric["A"].append(("8", "<^^^"))
-moves_numeric["A"].append(("8", "^^^<"))
-moves_numeric["A"].append(("9", "^^^"))
 
-moves_numeric["1"].append(("2", ">"))
-moves_numeric["1"].append(("4", "^"))
-moves_numeric["1"].append(("6", ">>^"))
-moves_numeric["1"].append(("6", "^>>"))
-moves_numeric["1"].append(("7", "^^"))
+def trav(maze, x, y, completed, path):
+    out = [(maze[y][x], path)]
+    for dx, dy, c in ((0, 1, "v"), (1, 0, ">"), (-1, 0, "<"), (0, -1, "^")):
+        cand = (x + dx, y + dy)
+        if cand not in completed and 0 <= cand[0] < len(maze[0]) and 0 <= cand[1] < len(maze):
+            if maze[dy + y][dx + x] != " ":
+                com2 = completed.copy()
+                com2.append(cand)
+                path2 = path + c
+                for r in trav(maze, cand[0], cand[1], com2, path2):
+                    out.append(r)
 
-moves_numeric["2"].append(("9", "^^>"))
-moves_numeric["2"].append(("9", ">^^"))
+    return out
 
-moves_numeric["3"].append(("7", "<<^^"))
-moves_numeric["3"].append(("7", "^^<<"))
-moves_numeric["3"].append(("A", "v"))
 
-moves_numeric["4"].append(("0", ">vv"))
-moves_numeric["4"].append(("5", ">"))
-
-moves_numeric["5"].append(("6", ">"))
-
-moves_numeric["6"].append(("9", "^"))
-moves_numeric["6"].append(("A", "vv"))
-
-moves_numeric["7"].append(("0", ">vvv"))
-moves_numeric["7"].append(("9", ">>"))
-
-moves_numeric["8"].append(("0", "vvv"))
-
-moves_numeric["9"].append(("8", "<"))
-moves_numeric["9"].append(("A", "vvv"))
-
-moves_numeric["0"].append(("2", "^"))
-moves_numeric["0"].append(("3", ">^"))
-moves_numeric["0"].append(("3", "^>"))
-moves_numeric["0"].append(("A", ">"))
-
-# Moves are complete.
-# Again: If you have to press a button multiple times within a path, you should press it without different buttons in between.
-moves_directional = defaultdict(list)
-moves_directional["A"].append(("^", "<"))
-moves_directional["A"].append(("v", "v<"))
-moves_directional["A"].append(("v", "<v"))
-moves_directional["A"].append((">", "v"))
-moves_directional["A"].append(("<", "v<<"))
-
-moves_directional["^"].append(("A", ">"))
-moves_directional["^"].append(("v", "v"))
-moves_directional["^"].append((">", "v>"))
-moves_directional["^"].append((">", ">v"))
-moves_directional["^"].append(("<", "v<"))
-
-moves_directional["v"].append(("A", ">^"))
-moves_directional["v"].append(("A", "^>"))
-moves_directional["v"].append(("^", "^"))
-moves_directional["v"].append((">", ">"))
-moves_directional["v"].append(("<", "<"))
-
-moves_directional["<"].append(("A", ">>^"))
-moves_directional["<"].append(("^", ">^"))
-moves_directional["<"].append(("v", ">"))
-moves_directional["<"].append((">", ">>"))
-
-moves_directional[">"].append(("A", "^"))
-moves_directional[">"].append(("^", "<^"))
-moves_directional[">"].append(("^", "^<"))
-moves_directional[">"].append(("v", "<"))
-moves_directional[">"].append(("<", "<<"))
+def calc_moves(maze, chars):
+    moves = defaultdict(list)
+    for y in range(len(maze)):
+        for x in range(len(maze[0])):
+            c = maze[y][x]
+            if c != " ":
+                all_paths = trav(maze, x, y, [(x, y)], "")
+                for target in chars:
+                    if target != c:
+                        paths_for_target = [x for x in all_paths if x[0] == target]
+                        min_len_for_target = sys.maxsize
+                        for x in paths_for_target:
+                            min_len_for_target = min(min_len_for_target, len(x[1]))
+                        for x in paths_for_target:
+                            if len(x[1]) == min_len_for_target:
+                                moves[c + target].append(x[1])
+    return moves
 
 
 def get_sequences(seq, moves):
@@ -90,7 +44,7 @@ def get_sequences(seq, moves):
     last = "A"
     for c in seq:
         if last != c:
-            cands = [x[1] for x in moves[last] if x[0] == c]
+            cands = moves[last + c]
             if len(cands) == 1:
                 for i, _ in enumerate(outs):
                     outs[i] = outs[i] + cands[0] + "A"
@@ -132,7 +86,7 @@ def solve(n):
     out = 0
     for l in lines:
         num = int(l[:-1])
-        candidates = get_sequences(l, moves_numeric)
+        candidates = get_sequences(l, moves_numerical)
         compl = sys.maxsize
         for c in candidates:
             my_compl = f(c, n)
@@ -140,6 +94,12 @@ def solve(n):
         out += num * compl
     return out
 
+
+num_pad = [list("789"), list("456"), list("123"), list(" 0A")]
+dir_pad = [list(" ^A"), list("<v>")]
+
+moves_numerical = calc_moves(num_pad, "A0123456789")
+moves_directional = calc_moves(dir_pad, "A^<v>")
 
 p1 = solve(2)
 p2 = solve(25)
