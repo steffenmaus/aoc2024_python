@@ -3,16 +3,6 @@ from collections import defaultdict
 with open('input.txt') as file:
     lines = [line.rstrip() for line in file]
 
-
-def get_deltas(ints):
-    deltas = []
-    prev = ints[0]
-    for i in range(1, len(ints)):
-        deltas.append(ints[i] - prev)
-        prev = ints[i]
-    return deltas
-
-
 endings = []
 
 p1 = 0
@@ -34,14 +24,19 @@ print("Part 1: " + str(p1))
 bananas_per_pattern = defaultdict(int)
 for ends in endings:
     my_patterns = set()
-    delt = get_deltas(ends)
-    pos = 0
-    while pos < len(ends) - 4:
-        pattern = ",".join(str(x) for x in delt[pos:pos + 4])
-        if pattern not in my_patterns:
-            bananas_per_pattern[pattern] += ends[pos + 4]
-            my_patterns.add(pattern)
-        pos += 1
+    prev = None
+    recent_deltas = []
+    for e in ends:
+        if prev is not None:
+            recent_deltas.append(prev - e)
+            recent_deltas = recent_deltas[-4:]
+
+        if len(recent_deltas) == 4:
+            pattern = ",".join(str(x) for x in recent_deltas)
+            if pattern not in my_patterns:
+                bananas_per_pattern[pattern] += e
+                my_patterns.add(pattern)
+        prev = e
 
 p2 = 0
 for pot in bananas_per_pattern:
